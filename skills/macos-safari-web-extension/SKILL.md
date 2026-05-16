@@ -15,6 +15,19 @@ Use this skill when working on a macOS-only Safari Web Extension that has a Swif
 4. Read [privacy-validation.md](references/privacy-validation.md) before changing permissions, entitlements, privacy manifests, release docs, or validation commands.
 5. Keep changes local-first: page processing runs in Safari, settings stay in extension local storage, and the host app only guides extension enablement.
 
+## Build Path
+
+For a new Safari dark mode extension:
+
+1. Create a macOS App project with a Safari Web Extension target.
+2. Keep the host app minimal: extension status, enablement text, and an open Safari Settings button.
+3. Configure Manifest V3 with `storage`, `activeTab`, `scripting`, and `<all_urls>`.
+4. Load `vendor/darkreader.min.js` before `content.js`.
+5. Implement `background.js` for default settings, migrations, messages, and CSS fetching.
+6. Implement `content.js` for prepaint, storage reads, DarkReader enable/disable, system mode, iframe support, and low-contrast repair.
+7. Implement popup controls for mode, current site, brightness, contrast, sepia, and optional local-only page widgets.
+8. Add privacy manifests and run validation.
+
 ## Implementation Priorities
 
 - Prefer a small SwiftUI host app that shows extension status and opens Safari Settings.

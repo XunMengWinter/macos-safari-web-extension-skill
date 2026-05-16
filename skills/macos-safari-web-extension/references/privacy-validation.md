@@ -50,6 +50,18 @@ xcodebuild -project DarkSafari.xcodeproj -scheme DarkSafari -configuration Debug
 
 Adapt paths and scheme names for the target project.
 
+## Safari Debugging Checklist
+
+When testing locally:
+
+- Enable the extension in Safari Settings.
+- Reload existing tabs after first install, or let the popup inject content scripts.
+- Use Safari Web Inspector to inspect content script errors.
+- If popup changes do nothing, check tab messaging and the `scripting` permission.
+- If pages stay partly bright, check cross-origin CSS fetching.
+- If the host app cannot open settings, check the extension bundle identifier.
+- If settings do not persist, check extension local storage access.
+
 ## Manual Safari Scenarios
 
 Test:

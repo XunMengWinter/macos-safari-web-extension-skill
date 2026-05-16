@@ -1,5 +1,17 @@
 # Project Shape
 
+## From Zero in Xcode
+
+For a new project:
+
+1. Create a macOS App project.
+2. Add a Safari Web Extension target.
+3. Use SwiftUI for the host app.
+4. Set the deployment target to macOS 13.0 or newer.
+5. Keep App Sandbox enabled.
+6. Keep the host app small: status, instructions, and open Safari Settings.
+7. Sync the extension bundle identifier anywhere the host app queries or opens the extension.
+
 ## Host App
 
 Use a small macOS SwiftUI app as the Safari extension host.

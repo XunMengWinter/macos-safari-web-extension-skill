@@ -29,6 +29,19 @@
 - Notify the active tab to reapply settings.
 - Inject missing content scripts into already-open tabs when message delivery fails.
 
+## Minimum Dark Mode Behavior
+
+A correct Safari dark mode extension should:
+
+- Inject at `document_start`.
+- Add a temporary dark background before storage reads finish.
+- Read `mode`, `disabledHosts`, `skipDarkSites`, `brightness`, `contrast`, and `sepia`.
+- Use DarkReader or equivalent local processing to enable and disable page darkening.
+- Listen for system color-scheme changes when `mode` is `system`.
+- Apply changes without requiring a page refresh.
+- Support iframe content with `all_frames` and `match_about_blank`.
+- Fall back to `scripting.executeScript()` when the current tab opened before content scripts were available.
+
 ## Local Settings
 
 Use extension local storage. A dark-mode extension can start with:
