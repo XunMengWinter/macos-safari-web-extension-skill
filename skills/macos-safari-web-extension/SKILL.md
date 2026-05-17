@@ -1,56 +1,53 @@
 ---
 name: macos-safari-web-extension
-description: Build, replicate, review, or fix macOS Safari Web Extensions, including adding robust dark mode to existing extensions. Use for Safari toolbar popups, Manifest V3, extension storage, content/background/popup script contracts, DarkReader-style page processing, compatibility hardening for complex sites, privacy review, permissions, entitlements, and App Store validation.
+description: Build, review, or fix macOS Safari Web Extensions. Use for SwiftUI host apps, Safari toolbar popups, Manifest V3, extension storage, content/background/popup script contracts, permissions, privacy manifests, App Store validation, and optional local page-processing features such as dark mode.
 ---
 
 # macOS Safari Web Extension
 
-Use this skill when working on a macOS Safari Web Extension, whether creating a new extension or adding dark mode to an existing extension.
+Use this skill when working on a macOS Safari Web Extension, whether creating a new extension or improving an existing one.
 
 ## Workflow
 
-1. Confirm the work is for a macOS Safari Web Extension. Preserve the existing product scope and architecture unless the user asks for a broader change.
-2. Read [project-shape.md](references/project-shape.md) before creating, restructuring, or integrating with the app and extension.
-3. Read [extension-contract.md](references/extension-contract.md) before changing `manifest.json`, `content.js`, `background.js`, `popup.html`, `popup.css`, or `popup.js`.
-4. Read [privacy-validation.md](references/privacy-validation.md) before changing permissions, entitlements, privacy manifests, release docs, or validation commands.
-5. Prefer local-first dark-mode processing. For existing products, keep current account, backend, analytics, sync, and billing behavior unchanged unless dark-mode support explicitly requires review.
+1. Confirm the work is for macOS Safari. Do not expand scope to iPhone, iPad, Chrome, backend services, accounts, analytics, or billing unless the user asks.
+2. Preserve the existing product architecture first. Add the smallest focused change that satisfies the request.
+3. Read [project-shape.md](references/project-shape.md) when creating, restructuring, or integrating the host app and extension target.
+4. Read [extension-contract.md](references/extension-contract.md) before changing `manifest.json`, content scripts, background scripts, popup files, storage keys, or messaging.
+5. Read [privacy-validation.md](references/privacy-validation.md) before changing permissions, entitlements, privacy manifests, release docs, or validation commands.
+6. Implement in small slices and validate the affected host app, extension scripts, manifest, and Safari behavior.
 
 ## New Extension Path
 
-For a new Safari dark mode extension:
+For a new Safari extension:
 
-1. Create a macOS App project with a Safari Web Extension target.
-2. Prefer a small SwiftUI host app: extension status, enablement text, and an open Safari Settings button.
-3. Configure Manifest V3 with `storage`, `activeTab`, `scripting`, and `<all_urls>`.
-4. Load `vendor/darkreader.min.js` before `content.js`.
-5. Implement `background.js` for default settings, migrations, messages, and CSS fetching.
-6. Implement `content.js` for prepaint, storage reads, DarkReader enable/disable, system mode, iframe support, and low-contrast repair.
-7. Implement popup controls for mode, current site, brightness, contrast, sepia, and optional local-only page widgets.
-8. Add a compatibility pass for login pages, app shells, cross-origin iframes, and CSS fetch failures.
-9. Add privacy manifests and run validation.
+1. Create a macOS app with a Safari Web Extension target.
+2. Keep the host app small: product identity, extension status, enablement guidance, and a button to open Safari Settings.
+3. Use Manifest V3 and request only permissions that the feature needs.
+4. Put daily controls in the Safari toolbar popup.
+5. Use extension local storage for user settings.
+6. Add content scripts, background scripts, native handlers, or page UI only when the product behavior requires them.
+7. Add privacy manifests and run validation before release.
 
 ## Existing Extension Path
 
 For an existing Safari extension:
 
 1. Inspect the current manifest, popup, content scripts, background scripts, storage keys, permissions, entitlements, and host app behavior.
-2. Add dark-mode settings using existing storage patterns when possible.
-3. Add or extend content script processing without replacing unrelated extension behavior.
-4. Add dark-mode controls to the existing popup instead of redesigning the full popup.
-5. Request new permissions only when the dark-mode feature needs them.
-6. Run compatibility tests on complex pages, especially login pages, app shells, iframes, and cross-origin CSS pages.
+2. Reuse existing architecture, naming, UI surfaces, and storage patterns when possible.
+3. Add new controls to the existing popup or settings surface instead of redesigning unrelated UI.
+4. Request new permissions only when the new feature needs them.
+5. Keep account, backend, sync, analytics, billing, and release behavior unchanged unless the user explicitly asks to change them.
 
 ## Implementation Priorities
 
-- Preserve existing architecture first; use the new-extension defaults only when starting from scratch.
-- Prefer a small SwiftUI host app for new macOS Safari extension projects.
-- Keep dark-mode controls in the Safari toolbar popup unless the existing extension has another established settings surface.
-- Inject content scripts at `document_start` and support `all_frames` plus `match_about_blank`.
-- Use local rules and behavior-based fixes before domain-specific patches.
-- If using DarkReader or similar runtime processing, keep CSS/resource handling inside the extension boundary.
-- Treat pages that stay white as a compatibility bug to investigate across frames, CSS fetching, skip-dark detection, and late-rendered app roots.
-- Treat optional page widgets, such as a top-frame pet or helper control, as local-only features that are disabled by default.
+- Host app: status and enablement guidance, not a default full settings center.
+- Popup: compact daily controls with clear current-site context when relevant.
+- Content scripts: use `document_start`, `all_frames`, or `match_about_blank` only when the feature needs early or frame-wide page behavior.
+- Background scripts: keep cross-context work small, message-based, and explainable.
+- Storage: prefer local extension storage for extension settings.
+- Compatibility: use behavior-based fixes before domain-specific patches.
+- Page UI: optional overlays or helper controls should be local, lightweight, and off by default unless the product requires otherwise.
 
 ## Validation
 
-Run JavaScript syntax checks, manifest JSON validation, and a macOS build after relevant changes. Use the commands and manual scenarios in [privacy-validation.md](references/privacy-validation.md).
+Run syntax checks, manifest validation, and a macOS build after relevant changes. Use the commands and manual scenarios in [privacy-validation.md](references/privacy-validation.md), adapting paths and scheme names to the target project.

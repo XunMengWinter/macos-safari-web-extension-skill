@@ -2,80 +2,71 @@
 
 ## Privacy Boundary
 
-For new dark-mode extensions, prefer a local-first privacy baseline:
+For a new local-first Safari extension, prefer this baseline:
 
-- Dark-mode processing runs in Safari.
-- Dark-mode settings stay in extension storage.
-- The dark-mode feature does not need browsing history, page content upload, account data, search text, form input, analytics, ads, or tracking.
+- Settings stay in extension local storage.
+- Page behavior runs locally in Safari.
+- No browsing history, page content, account data, form input, analytics, ads, or tracking are collected unless the product explicitly requires it.
 
-For existing products, preserve current account, backend, analytics, sync, and billing behavior. Review whether the dark-mode work changes data collection, permissions, entitlements, or App Store privacy answers. Do not remove or redesign existing product systems unless the user asks.
+For existing products, preserve current account, backend, analytics, sync, billing, and privacy behavior unless the user asks to change them. Review whether the requested work changes data collection, permissions, entitlements, or App Store privacy answers.
 
-Both app and extension targets should include `PrivacyInfo.xcprivacy`. For a purely local dark-mode tool, the expected App Store privacy baseline is `Data Not Collected`.
+Both app and extension targets should include `PrivacyInfo.xcprivacy`. The manifest must match actual behavior.
 
 ## Permissions and Entitlements
 
-Permission rationale:
+Common permission rationale:
 
-- `activeTab`: inspect the active tab context for popup state and current-site controls.
-- `scripting`: inject content scripts into already-open tabs when needed.
-- `storage`: persist extension settings locally.
-- `<all_urls>`: process user-visited pages and fetch current-page CSS resources for local processing.
+- `storage`: save extension settings locally.
+- `activeTab`: use active tab context after user interaction.
+- `scripting`: inject scripts into already-open tabs when needed.
+- Host permissions: read or modify pages within the declared scope.
 
-Entitlement baseline:
+Entitlement guidance:
 
-- New local-first host app: usually no outgoing network and no user-selected file access.
-- Existing host app: preserve current entitlements unless dark-mode work requires a reviewed change.
-- Extension: outgoing network may be needed for fetching current-page CSS resources used by local page processing.
+- Host app: keep outgoing network and file access off unless the app needs them.
+- Existing host app: preserve current entitlements unless the requested work requires review.
+- Extension: network access may be justified for current-page resources or product-specific remote APIs, but document why.
 
-Any new permission or entitlement must be explainable by the local extension feature it enables.
+Any new permission or entitlement must be explainable by the feature it enables.
 
 ## Minimal Validation
 
-After changing extension scripts:
+After changing extension scripts, adapt paths and run:
 
 ```bash
-node --check 'DarkSafari Extension/Resources/content.js'
-node --check 'DarkSafari Extension/Resources/background.js'
-node --check 'DarkSafari Extension/Resources/popup.js'
-python3 -m json.tool 'DarkSafari Extension/Resources/manifest.json' >/tmp/darksafari-manifest.json
+node --check '<extension-resources>/content.js'
+node --check '<extension-resources>/background.js'
+node --check '<extension-resources>/popup.js'
+python3 -m json.tool '<extension-resources>/manifest.json' >/tmp/safari-extension-manifest.json
 ```
 
-After changing Swift, Xcode settings, signing, entitlements, or before release:
+After changing Swift, Xcode settings, signing, entitlements, or before release, adapt project and scheme names:
 
 ```bash
-xcodebuild -project DarkSafari.xcodeproj -scheme DarkSafari -configuration Debug -derivedDataPath /tmp/DarkSafariDerivedData CODE_SIGNING_ALLOWED=NO build
+xcodebuild -project '<Project>.xcodeproj' -scheme '<Scheme>' -configuration Debug -derivedDataPath /tmp/<Project>DerivedData CODE_SIGNING_ALLOWED=NO build
 ```
-
-Adapt paths and scheme names for the target project.
 
 ## Safari Debugging Checklist
 
-When testing locally:
-
 - Enable the extension in Safari Settings.
-- Reload existing tabs after first install, or let the popup inject content scripts.
-- Use Safari Web Inspector to inspect content script errors.
+- Reload existing tabs after first install, or let the popup inject scripts when supported.
+- Use Safari Web Inspector to inspect content script and popup errors.
 - If popup changes do nothing, check tab messaging and the `scripting` permission.
-- If pages stay partly bright, check cross-origin CSS fetching.
-- If a login page stays white, inspect every frame and verify content scripts ran in the login iframe.
-- If an app shell stays white, check whether the white container was inserted after DarkReader started.
-- If a page is incorrectly skipped as already dark, test with `skipDarkSites` disabled and review the real background detection.
+- If page behavior is missing in embedded content, inspect every frame and verify content scripts ran where expected.
+- If dynamic content is missed, check whether the page inserted new containers after initial processing.
 - If the host app cannot open settings, check the extension bundle identifier.
 - If settings do not persist, check extension local storage access.
 
-## Manual Safari Scenarios
+## Manual Scenarios
 
-Test:
+Choose scenarios that match the feature:
 
-- A bright page on first load.
-- A page that is already dark.
-- iframe login or embedded content.
-- A complex login page with cross-origin authentication frames, for example App Store Connect login.
-- Pages with cross-origin CSS.
-- A JavaScript app shell that renders content after initial load.
-- Pages with hardcoded dark text on dark backgrounds.
-- Per-site disable and restore.
-- Popup setting changes without refresh.
-- Optional top-frame widget disabled by default, enabled, moved, hidden, and restored.
 - Host app extension status display.
 - Host app button opens Safari Settings.
+- Popup opens and shows the expected current-site context.
+- Popup settings persist after closing and reopening.
+- Popup changes apply without a refresh when the feature promises that behavior.
+- Existing tabs behave correctly after install or update.
+- iframe or embedded content works when frame coverage is required.
+- Dynamic web apps work when page processing is required.
+- Permission prompts and App Store privacy answers match actual behavior.

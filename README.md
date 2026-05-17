@@ -1,6 +1,6 @@
 # macOS Safari Web Extension Skill
 
-A concise Codex Skill for building, replicating, reviewing, or fixing macOS Safari Web Extensions, including adding dark mode to existing extensions. It covers Safari toolbar popups, extension storage, Manifest V3, DarkReader-style page processing, compatibility hardening, privacy review, and App Store validation.
+A concise Codex Skill for building, reviewing, or fixing macOS Safari Web Extensions. It covers SwiftUI host apps, Safari toolbar popups, Manifest V3, extension storage, content/background/popup script contracts, permissions, privacy review, and App Store validation.
 
 Only the folder under `skills/` is the installable Skill:
 
@@ -38,7 +38,7 @@ Do not install the repository root as a Skill. The installable Skill folder is `
 After installing, verify that `~/.codex/skills/macos-safari-web-extension/SKILL.md` exists and tell me the final installed path.
 ```
 
-中文：
+Chinese:
 
 ```text
 请帮我安装这个 Codex Skill：https://github.com/XunMengWinter/macos-safari-web-extension-skill
@@ -61,19 +61,19 @@ Use $macos-safari-web-extension to create a macOS Safari Web Extension with a Sw
 Existing project:
 
 ```text
-Use $macos-safari-web-extension to add robust dark mode support to this existing macOS Safari Web Extension without replacing its current architecture.
+Use $macos-safari-web-extension to add a focused feature to this existing macOS Safari Web Extension without replacing its current architecture.
 ```
 
 Chinese:
 
 ```text
-使用 $macos-safari-web-extension，帮我复刻一个 macOS Safari 深色模式扩展项目。
+使用 $macos-safari-web-extension，帮我创建一个 macOS Safari 插件项目。
 ```
 
 已有项目：
 
 ```text
-使用 $macos-safari-web-extension，在我现有的 macOS Safari 扩展里增加稳定的深色模式支持，不要重写现有架构。
+使用 $macos-safari-web-extension，在我现有的 macOS Safari 插件里增加一个功能，不要重写现有架构。
 ```
 
 ## Scope
@@ -81,16 +81,16 @@ Chinese:
 Use this Skill for:
 
 - macOS Safari Web Extension projects.
-- Adding or improving dark mode in an existing macOS Safari extension.
 - New SwiftUI host apps that show extension status and open Safari Settings.
 - Existing host apps that should keep their current responsibilities.
 - Safari toolbar popup controls.
 - Extension local storage settings.
-- `content.js`, `background.js`, and `popup.js` contracts.
-- Local DarkReader-style page processing.
+- `manifest.json`, content scripts, background scripts, and popup scripts.
+- Local page-processing features such as dark mode, highlighting, filtering, or helper overlays.
 - Privacy manifests, permissions, entitlements, and validation checklists.
 
 Do not use this Skill as the primary guide for:
 
 - iPhone or iPad Safari extensions.
 - Chrome-only extensions.
+- Backend services, account systems, analytics, billing, or sync features unless they already exist in the product and are directly relevant.

@@ -2,53 +2,40 @@
 
 ## Existing Project First
 
-When adding dark mode to an existing extension, inspect before changing:
+Before changing an existing extension, inspect:
 
-- `manifest.json`: manifest version, permissions, content scripts, action popup, and host permissions.
-- Current content, background, and popup scripts.
+- `manifest.json`: manifest version, permissions, host permissions, content scripts, action popup, background configuration.
+- Current content, background, popup, and native handler code.
 - Existing storage keys and migration patterns.
-- Existing host app responsibilities and bundle identifier usage.
-- Current entitlements, privacy manifests, and release notes.
+- Host app responsibilities and extension bundle identifier usage.
+- Current entitlements, privacy manifests, signing, and release notes.
 
-Preserve the current architecture unless dark-mode support needs a focused change. Add new permissions, storage keys, or UI only where the dark-mode feature requires them.
+Preserve the current architecture unless the requested feature needs a focused change.
 
-## From Zero in Xcode
+## New Project Baseline
 
-For a new project:
+For a new macOS Safari extension:
 
-1. Create a macOS App project.
+1. Create a macOS app project.
 2. Add a Safari Web Extension target.
-3. Use SwiftUI for the host app.
-4. Set the deployment target to macOS 13.0 or newer.
+3. Prefer SwiftUI for a simple host app.
+4. Set a supported macOS deployment target for the intended audience.
 5. Keep App Sandbox enabled.
-6. Prefer a small host app: status, instructions, and open Safari Settings.
-7. Sync the extension bundle identifier anywhere the host app queries or opens the extension.
+6. Keep bundle identifiers synchronized across the Xcode target, extension Info.plist, and host app code.
 
 ## Host App
 
-For a new project, use a small macOS SwiftUI app as the Safari extension host. For an existing project, keep the current host app shape unless dark-mode support requires a targeted change.
+The host app usually handles:
 
-Responsibilities:
+- Product identity.
+- Extension status.
+- Enablement guidance.
+- Opening Safari Settings for the extension.
+- Minimal privacy or local-processing messaging when relevant.
 
-- Show product identity and extension status.
-- Explain how to enable the extension.
-- Open Safari Settings for the extension.
-- Exit after the last window closes if that matches the app's desired lifecycle.
+Avoid turning the host app into a full settings center unless the product scope requires it.
 
-Preserve:
-
-- Existing settings surfaces.
-- Existing account, backend, billing, analytics, or sync behavior.
-- Existing entitlements and file access unless the dark-mode feature needs a reviewed change.
-
-Typical files:
-
-- `DarkSafari/DarkSafariApp.swift`: SwiftUI `@main` entry.
-- `DarkSafari/ContentView.swift`: status and enablement UI.
-- `DarkSafari/AppDelegate.swift`: minimal lifecycle behavior.
-- `DarkSafari/PrivacyInfo.xcprivacy`: privacy manifest for the host app.
-
-Core APIs:
+Core Safari APIs:
 
 ```swift
 SFSafariExtensionManager.getStateOfSafariExtension(withIdentifier: extensionBundleIdentifier)
@@ -57,54 +44,39 @@ SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionBundleI
 
 ## Web Extension Bundle
 
-Typical files:
+Typical resource types:
 
-- `DarkSafari Extension/Resources/manifest.json`
-- `DarkSafari Extension/Resources/content.js`
-- `DarkSafari Extension/Resources/background.js`
-- `DarkSafari Extension/Resources/popup.html`
-- `DarkSafari Extension/Resources/popup.css`
-- `DarkSafari Extension/Resources/popup.js`
-- `DarkSafari Extension/Resources/vendor/darkreader.min.js`
-- `DarkSafari Extension/SafariWebExtensionHandler.swift`
-- `DarkSafari Extension/PrivacyInfo.xcprivacy`
+- `manifest.json`
+- Content scripts, when pages need injected behavior.
+- Background script or service worker, when cross-context coordination is needed.
+- Popup HTML/CSS/JS, when the toolbar icon opens controls.
+- Images and local assets.
+- Native Safari handler, only when native bridging is needed.
+- `PrivacyInfo.xcprivacy` for app and extension targets.
 
-Use the native Safari handler only for bridge needs. Most page processing should stay in Web Extension scripts.
+Most page-facing behavior should stay in Web Extension scripts. Use the native handler only for APIs that require native bridging.
 
-## Manifest Baseline
+## Manifest Guidance
 
-Use Manifest V3.
+Use Manifest V3 unless the project has a clear reason not to.
 
-Minimum permissions:
+Common permissions:
 
-```json
-{
-  "permissions": ["activeTab", "scripting", "storage"],
-  "host_permissions": ["<all_urls>"]
-}
-```
+- `storage`: persist extension settings.
+- `activeTab`: inspect or act on the currently active tab after user interaction.
+- `scripting`: inject scripts into already-open tabs when needed.
 
-Content script baseline:
+Use host permissions only for pages the extension actually needs to read or modify. If broad page processing is the product, `<all_urls>` may be appropriate, but it must be reflected in permission and privacy explanations.
+
+Content script fields to consider when the feature needs page injection:
 
 ```json
 {
-  "js": ["vendor/darkreader.min.js", "content.js"],
   "matches": ["<all_urls>"],
+  "run_at": "document_start",
   "all_frames": true,
-  "match_about_blank": true,
-  "run_at": "document_start"
+  "match_about_blank": true
 }
 ```
 
-Action baseline:
-
-```json
-{
-  "action": {
-    "default_popup": "popup.html",
-    "default_icon": "images/toolbar-icon.svg"
-  }
-}
-```
-
-Keep bundle identifiers synchronized across the Xcode target, extension Info.plist, and the host app code that queries the Safari extension state.
+Do not include `document_start`, `all_frames`, or broad matches by default if the requested feature does not need them.
