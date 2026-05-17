@@ -1,5 +1,17 @@
 # Project Shape
 
+## Existing Project First
+
+When adding dark mode to an existing extension, inspect before changing:
+
+- `manifest.json`: manifest version, permissions, content scripts, action popup, and host permissions.
+- Current content, background, and popup scripts.
+- Existing storage keys and migration patterns.
+- Existing host app responsibilities and bundle identifier usage.
+- Current entitlements, privacy manifests, and release notes.
+
+Preserve the current architecture unless dark-mode support needs a focused change. Add new permissions, storage keys, or UI only where the dark-mode feature requires them.
+
 ## From Zero in Xcode
 
 For a new project:
@@ -9,12 +21,12 @@ For a new project:
 3. Use SwiftUI for the host app.
 4. Set the deployment target to macOS 13.0 or newer.
 5. Keep App Sandbox enabled.
-6. Keep the host app small: status, instructions, and open Safari Settings.
+6. Prefer a small host app: status, instructions, and open Safari Settings.
 7. Sync the extension bundle identifier anywhere the host app queries or opens the extension.
 
 ## Host App
 
-Use a small macOS SwiftUI app as the Safari extension host.
+For a new project, use a small macOS SwiftUI app as the Safari extension host. For an existing project, keep the current host app shape unless dark-mode support requires a targeted change.
 
 Responsibilities:
 
@@ -23,20 +35,18 @@ Responsibilities:
 - Open Safari Settings for the extension.
 - Exit after the last window closes if that matches the app's desired lifecycle.
 
-Avoid:
+Preserve:
 
-- Full settings surfaces in the host app.
-- Web views for host UI.
-- Backend calls.
-- Account, billing, analytics, or sync flows.
-- User-selected file access unless the product scope explicitly changes.
+- Existing settings surfaces.
+- Existing account, backend, billing, analytics, or sync behavior.
+- Existing entitlements and file access unless the dark-mode feature needs a reviewed change.
 
 Typical files:
 
 - `DarkSafari/DarkSafariApp.swift`: SwiftUI `@main` entry.
 - `DarkSafari/ContentView.swift`: status and enablement UI.
 - `DarkSafari/AppDelegate.swift`: minimal lifecycle behavior.
-- `DarkSafari/PrivacyInfo.xcprivacy`: no data collection and no tracking.
+- `DarkSafari/PrivacyInfo.xcprivacy`: privacy manifest for the host app.
 
 Core APIs:
 
